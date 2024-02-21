@@ -1,8 +1,10 @@
 #include "Sim_Engine.h"
 
+int ackNumber = 0;
 
 /* Called from layer 5, passed the data to be sent to other side */
 void A_output( struct msg message) {
+  ackNumber = 1;
   /* TODO */
 }
 
