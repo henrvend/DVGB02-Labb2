@@ -11,6 +11,7 @@ void B_output(struct msg message)
 void B_input(struct pkt packet)
 {
   /* TODO */
+  tolayer5(0, packet.payload);
   int sumLen = 0;
   for (int i = 0; packet.payload[i] != '\0'; i++)
   {

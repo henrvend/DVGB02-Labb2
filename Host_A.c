@@ -30,7 +30,6 @@ void A_output(struct msg message)
 
   tolayer3(A, pkt2give);
   starttimer(A, TT);
-  printf("Inkommit output\n");
 
   /* TODO */
 }
@@ -53,14 +52,12 @@ void A_input(struct pkt packet)
     printf("skicka på nytt\n");
   }
 
-  printf("Inkommit input\n");
 }
 
 /* Called when A's timer goes off */
 void A_timerinterrupt()
 {
   /* TODO */
-  printf("Inkommit timer");
 }
 
 /* The following routine will be called once (only) before any other */
