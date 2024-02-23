@@ -1,18 +1,21 @@
 #include "Sim_Engine.h"
+#include "Host_A.h"
 #include <string.h> //Tillagd
 #include <stdbool.h>
 
 #define TT 1000
-int A = 0;
-bool ackNumber = 0, seqNumber = 0;
+
+int A = 0,queLen = 0;
+struct pkt packetQue[100];
+bool timerOn = false, ackNumber = 0, seqNumber = 0;
 
 /* Called from layer 5, passed the data to be sent to other side */
 void A_output(struct msg message)
 {
-  int x, sumLen = 0;
+  int sumLen = 0;
+  struct pkt pkt2give;
   ackNumber = !ackNumber;
   seqNumber = !seqNumber;
-  struct pkt pkt2give;
 
   pkt2give.acknum = ackNumber;
   pkt2give.seqnum = seqNumber;
@@ -28,17 +31,25 @@ void A_output(struct msg message)
 
   pkt2give.checksum = sumLen;
 
-  tolayer3(A, pkt2give);
-  starttimer(A, TT);
+  enqueue(pkt2give);
 
-  /* TODO */
+  if (!timerOn)
+  {
+    toB(A, pkt2give);
+  }
+
 }
 
 /* Called from layer 3, when a packet arrives for layer 4 */
 void A_input(struct pkt packet)
 {
   /* TODO */
-  stoptimer(A);
+  if (timerOn)
+  {
+    stoptimer(A);
+    timerOn = false;
+  }
+
   int sumLen = 0;
   for (int i = 0; packet.payload[i] != '\0'; i++)
   {
@@ -49,15 +60,19 @@ void A_input(struct pkt packet)
 
   if (packet.acknum != packet.seqnum || sumLen != packet.checksum)
   {
-    printf("skicka på nytt\n");
+    toB(A, packetQue[0]);
+  }else{
+    dequeue();
+    if(queLen!=0){
+      toB(A, packetQue[0]);
+    }
   }
-
 }
 
 /* Called when A's timer goes off */
 void A_timerinterrupt()
 {
-  /* TODO */
+  toB(A, packetQue[0]);
 }
 
 /* The following routine will be called once (only) before any other */
@@ -65,4 +80,26 @@ void A_timerinterrupt()
 void A_init()
 {
   /* TODO */
+}
+
+void toB(int AorB, struct pkt packet)
+{
+  timerOn = true;
+  tolayer3(AorB, packet);
+  starttimer(A, TT);
+  
+}
+
+void enqueue(struct pkt packet)
+{
+  packetQue[queLen] = packet;
+  queLen++;
+}
+
+void dequeue()
+{
+  for(int i=0; i<queLen-1; i++){
+    packetQue[i]=packetQue[i+1];
+  }
+  queLen--;
 }

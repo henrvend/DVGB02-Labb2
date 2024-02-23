@@ -1,6 +1,10 @@
 #include "Sim_Engine.h"
+#include <stdbool.h>
 
 int B = 1;
+bool seqNum = 1;
+
+
 /* Called from layer 5, passed the data to be sent to other side */
 void B_output(struct msg message)
 {
@@ -10,8 +14,8 @@ void B_output(struct msg message)
 /* Called from layer 3, when a packet arrives for layer 4 */
 void B_input(struct pkt packet)
 {
-  /* TODO */
-  tolayer5(0, packet.payload);
+
+  
   int sumLen = 0;
   for (int i = 0; packet.payload[i] != '\0'; i++)
   {
@@ -22,13 +26,15 @@ void B_input(struct pkt packet)
 
   if (sumLen != packet.checksum)
   {
-    packet.seqnum = 1;
+    packet.seqnum = !seqNum;
     packet.acknum = !packet.acknum;
     packet.checksum = sumLen;
     tolayer3(B, packet);
     return;
-  }
-
+  }else if(packet.seqnum==seqNum){
+    seqNum= !seqNum;
+    tolayer5(0, packet.payload);
+    }
   tolayer3(B, packet);
 }
 
