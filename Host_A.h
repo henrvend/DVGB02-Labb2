@@ -8,5 +8,6 @@ void A_init();
 void enqueue(struct pkt packet);
 void toB(int AorB, struct pkt packet);
 void dequeue();
+int sumLength(struct pkt packet);
 
 #endif
